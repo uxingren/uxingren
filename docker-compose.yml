@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+
+    nginx:
+        build:
+            context: ./nginx
+        depends_on:
+            - php
+        ports:
+            - ${NGINC_PORTS_DEFAULT}:80
+            - ${NGINX_HTTPS_PORTS_DEFAULT}:443
+        links:
+            - php
+        volumes:
+            - ${ROOT_DIR}:/app
+
+    php:
+        build:
+            context: ./${PHP_VERSION}
+        volumes:
+            - ${ROOT_DIR}:/app
+        links:
+            - redis
+            - mysql
+        depends_on:
+            - redis
+            - mysql
+    redis:
+        image: redis:3.0.7-alpine
+        ports:
+            - 6379:6379
+    mysql:
+        image: mysql:5.7
+        volumes:
+            - ${MYSQL_DATA}:/var/lib/mysql
+        ports:
+            - ${MYSQL_PORTS}:3306
+        environment:
+            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
